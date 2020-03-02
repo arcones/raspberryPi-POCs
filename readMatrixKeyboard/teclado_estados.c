@@ -35,7 +35,7 @@
 #define GPIO_ROW_4 13
 
 #define REFRESH_TIME 40 //en ms
-#define T_ANTIRREBOTES 4*REFRESH_TIME// rebound son milisengundos
+#define T_ANTIRREBOTES 8*REFRESH_TIME// rebound son milisengundos
 #define CLK_MS 5//en ms, reloj del sistema
 
 //
@@ -47,7 +47,7 @@ static int col[4] = {0,0,0,0};
 static int timein=0;
 static unsigned int columna=0;
 
-char keytec[16] ={'1', '4', '7', 'A', '2', '5', '8', '0', '3', '6', '9', 'B', 'C', 'D', 'E', 'F'};
+char keytec[16] ={'1', '4', '7', '*', '2', '5', '8', '0', '3', '6', '9', '#', 'A', 'B', 'C', 'D'};
 //
 
 enum keypad_state {KEY_COL };
