@@ -1,8 +1,8 @@
-# SDG2: Cosas que realmente hay que hacer al configurar un proyecto de cero
+# raspberryPi-POCs
 
-1. “Cross compiler prefix”: arm-linux-gnueabihf-
-2. “Cross compiler path”: 
-3. Properties proyecto -> C/C++ Build -> Settings -> All Configurations -> Includes -> Include paths (-I): Añadir C:\SysGCC\Raspberry\include y C:\SysGCC\Raspberry\include\wiringPi
-4. Properties proyecto -> C/C++ Build -> Settings -> All Configurations -> Libraries -> Library search path (-L): Añadir C:\SysGCC\Raspberry\lib
-5. Properties proyecto -> C/C++ Build -> Settings -> All Configurations -> Libraries -> Libraries (-l): Añadir wiringPi y rt
-6. Run configurations -> Copiar otro fichero .launch que tenga y personalizarlo con el nombre del proyecto
+> POC: Proof of concept, more info in https://en.wikipedia.org/wiki/Proof_of_concept
+
+This repository is composed by some minimal projects **coded in C** using the RaspberryPi.
+Each project is be stored in a subfolder of this repository and inside it, a README can be found with all the details to understand & run it.
+
+Have fun!
