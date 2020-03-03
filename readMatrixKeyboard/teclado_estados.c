@@ -108,7 +108,7 @@ static fsm_trans_t fsm_trans_deteccion_pulsaciones[] = {
 };
 
 // rutinas que usa main
-void initialize() {
+void InicializaTeclado() {
 wiringPiSetupGpio();
 int i=0;
 for (i=0; i<4; i++){
@@ -131,7 +131,7 @@ int main()
 	unsigned int next;
 	fsm_t* keypad_fsm = fsm_new(TECLADO_ESPERA_COLUMNA, fsm_trans_excitacion_columnas, NULL);
 	fsm_t* lcd_fsm = fsm_new(TECLADO_ESPERA_TECLA, fsm_trans_deteccion_pulsaciones , NULL);
-	initialize();
+	InicializaTeclado();
 
 	timein= millis();
 	printf ("Pulse teclas \n");
