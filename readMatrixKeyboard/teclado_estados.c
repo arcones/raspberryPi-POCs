@@ -12,100 +12,98 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <wiringPi.h>
-/*
-#include <assert.h>
-#include <string.h>
-#include <unistd.h>
-#include <sys/select.h>
-#include <sys/time.h>
-#include <time.h>
-#include <signal.h>
-*/
 #include "fsm.h"
 
 //
 //
-#define GPIO_COL_1 0
-#define GPIO_COL_2 1
-#define GPIO_COL_3 2
-#define GPIO_COL_4 3
-#define GPIO_ROW_1 5
-#define GPIO_ROW_2 6
-#define GPIO_ROW_3 12
-#define GPIO_ROW_4 13
+#define GPIO_KEYBOARD_COL_1 0
+#define GPIO_KEYBOARD_COL_2 1
+#define GPIO_KEYBOARD_COL_3 2
+#define GPIO_KEYBOARD_COL_4 3
+#define GPIO_KEYBOARD_ROW_1 5
+#define GPIO_KEYBOARD_ROW_2 6
+#define GPIO_KEYBOARD_ROW_3 12
+#define GPIO_KEYBOARD_ROW_4 13
 
-#define REFRESH_TIME 40 //en ms
-#define T_ANTIRREBOTES 8*REFRESH_TIME// rebound son milisengundos
+#define NUM_COLUMNAS_TECLADO 	4
+#define NUM_FILAS_TECLADO 		4
+
+#define TIMEOUT_COLUMNA_TECLADO 25 //en ms
+#define DEBOUNCE_TIME 13*TIMEOUT_COLUMNA_TECLADO// rebound son milisengundos
 #define CLK_MS 5//en ms, reloj del sistema
 
 //
-static int gpio_col[4]={GPIO_COL_1,GPIO_COL_2,GPIO_COL_3,GPIO_COL_4};  // array de columnas
-static int gpio_row[4]={GPIO_ROW_1,GPIO_ROW_2,GPIO_ROW_3,GPIO_ROW_4};   // array de filas
+static int columnas[NUM_COLUMNAS_TECLADO]={GPIO_KEYBOARD_COL_1,GPIO_KEYBOARD_COL_2,GPIO_KEYBOARD_COL_3,GPIO_KEYBOARD_COL_4};  // array de columnas
+static int filas[NUM_FILAS_TECLADO]={GPIO_KEYBOARD_ROW_1,GPIO_KEYBOARD_ROW_2,GPIO_KEYBOARD_ROW_3,GPIO_KEYBOARD_ROW_4};   // array de filas
 
 static int row[4] = {0,0,0,0};
 static int col[4] = {0,0,0,0};
 static int timein=0;
 static unsigned int columna=0;
 
-char keytec[16] ={'1', '4', '7', '*', '2', '5', '8', '0', '3', '6', '9', '#', 'A', 'B', 'C', 'D'};
-//
+char tecladoTL04[4][4] = {
+	{'1', '2', '3', 'A'},
+	{'4', '5', '6', 'B'},
+	{'7', '8', '9', 'C'},
+	{'*', '0', '#', 'D'}
+};
 
-enum keypad_state {KEY_COL };
-enum lcd_state {WAIT};
+enum keypad_state {TECLADO_ESPERA_COLUMNA };
+enum lcd_state {TECLADO_ESPERA_TECLA};
 
 
-static void boton_isr (int b)
+static void timer_duracion_columna_isr (int b)
 {
- static unsigned antirrebotes[4]={0,0,0,0};
+ static unsigned debounceTime[NUM_FILAS_TECLADO]={0,0,0,0};
  int now = millis();
- if (now < antirrebotes[b]) return; // si se detecta una repeticion pulsada antes de que pase un tiempo
+ if (now < debounceTime[b]) return; // si se detecta una repeticion pulsada antes de que pase un tiempo
  																		// se la ignora
  row[b]=1;
- antirrebotes[b] = now + T_ANTIRREBOTES;
+ debounceTime[b] = now + DEBOUNCE_TIME;
 }
 
-static void row_1_isr (void) { boton_isr(0); }
-static void row_2_isr (void) { boton_isr(1); }
-static void row_3_isr (void) { boton_isr(2); }
-static void row_4_isr (void) { boton_isr(3); }
-static void (* array_row_p[4]) ()= {row_1_isr,row_2_isr,row_3_isr,row_4_isr};
+static void teclado_fila_1_isr (void) { timer_duracion_columna_isr(0); }
+static void teclado_fila_2_isr (void) { timer_duracion_columna_isr(1); }
+static void teclado_fila_3_isr (void) { timer_duracion_columna_isr(2); }
+static void teclado_fila_4_isr (void) { timer_duracion_columna_isr(3); }
+static void (* rutinas_ISR[NUM_FILAS_TECLADO]) ()= {teclado_fila_1_isr,teclado_fila_2_isr,teclado_fila_3_isr,teclado_fila_4_isr};
 
 // rutinas que detectan eventos
 
-static int row_p (fsm_t* this){return (row[0]|row[1]|row[2]|row[3]);}
-static int timer_finished (fsm_t* this) {return (millis()-timein >= REFRESH_TIME);}
+static int CompruebaTeclaPulsada (fsm_t* this){return (row[0]|row[1]|row[2]|row[3]);}
+static int CompruebaTimeoutColumna (fsm_t* this) {return (millis()-timein >= TIMEOUT_COLUMNA_TECLADO);}
 
 
 
 // rutina principal que detecta tecla pulsada y la imprime en pantalla
 //
-static void write_tecla(fsm_t* this){
+static void ProcesaTeclaPulsada(fsm_t* this){
 int i=0;
 int k=0;
 	for (i=0; i<4; i++){
 		for (k=0; k<4; k++){
-			if ((row [i] == 1) && (col [k] == 1)){printf ("%c", keytec[k*4+i]);fflush (stdout);  row[i]=0;}
+			if ((row [i] == 1) && (col [k] == 1)){printf ("%c", tecladoTL04[i][k]);fflush (stdout);  row[i]=0;}
 		}
 	}
 }
 
 
-static void col_x(fsm_t* this) {
+static void TecladoExcitaColumna(fsm_t* this) {
 
 	columna++;
-	digitalWrite(gpio_col[(columna-1)%4], LOW);
-	digitalWrite(gpio_col[columna%4 ], HIGH);
+	digitalWrite(columnas[(columna-1)%4], LOW);
+	digitalWrite(columnas[columna%4 ], HIGH);
 	col[(columna-1)%4]=0; col[columna%4]=1;
 	timein=millis();
 }
 
-static fsm_trans_t keypad[] = {
-		{KEY_COL, timer_finished, KEY_COL, col_x },
+static fsm_trans_t fsm_trans_excitacion_columnas[] = {
+		{TECLADO_ESPERA_COLUMNA, CompruebaTimeoutColumna, TECLADO_ESPERA_COLUMNA, TecladoExcitaColumna },
 		{ -1, NULL, -1, NULL }, };
 
 
-static fsm_trans_t gkm[] = {
-		{WAIT, row_p, WAIT, write_tecla},
+static fsm_trans_t fsm_trans_deteccion_pulsaciones[] = {
+		{TECLADO_ESPERA_TECLA, CompruebaTeclaPulsada, TECLADO_ESPERA_TECLA, ProcesaTeclaPulsada},
 		{-1, NULL, -1, NULL },
 };
 
@@ -114,10 +112,10 @@ void initialize() {
 wiringPiSetupGpio();
 int i=0;
 for (i=0; i<4; i++){
-	pinMode(gpio_col[i], OUTPUT);
-	pinMode(gpio_row[i], INPUT);
-	pullUpDnControl (gpio_row[i], PUD_DOWN );  // todas las filas inicialmente a pull down
-	wiringPiISR(gpio_row[i], INT_EDGE_RISING, array_row_p[i]);  //array de rutinas de interrupción,
+	pinMode(columnas[i], OUTPUT);
+	pinMode(filas[i], INPUT);
+	pullUpDnControl (filas[i], PUD_DOWN );  // todas las filas inicialmente a pull down
+	wiringPiISR(filas[i], INT_EDGE_RISING, rutinas_ISR[i]);  //array de rutinas de interrupción,
 	// detectan flanco de subida
 	}
 }
@@ -131,8 +129,8 @@ void delay_hasta (unsigned int next)
 int main()
 	{
 	unsigned int next;
-	fsm_t* keypad_fsm = fsm_new(KEY_COL, keypad, NULL);
-	fsm_t* lcd_fsm = fsm_new(WAIT, gkm , NULL);
+	fsm_t* keypad_fsm = fsm_new(TECLADO_ESPERA_COLUMNA, fsm_trans_excitacion_columnas, NULL);
+	fsm_t* lcd_fsm = fsm_new(TECLADO_ESPERA_TECLA, fsm_trans_deteccion_pulsaciones , NULL);
 	initialize();
 
 	timein= millis();
