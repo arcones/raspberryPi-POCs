@@ -56,12 +56,12 @@ typedef struct {
 static int columnas[NUM_COLUMNAS_TECLADO]={GPIO_KEYBOARD_COL_1,GPIO_KEYBOARD_COL_2,GPIO_KEYBOARD_COL_3,GPIO_KEYBOARD_COL_4};  // array de columnas
 static int filas[NUM_FILAS_TECLADO]={GPIO_KEYBOARD_ROW_1,GPIO_KEYBOARD_ROW_2,GPIO_KEYBOARD_ROW_3,GPIO_KEYBOARD_ROW_4};   // array de filas
 
-static int row[4] = {0,0,0,0};
-static int col[4] = {0,0,0,0};//Array q almacena la columna pulsada actual... o eso parece...
 static int timein=0;
-static unsigned int columna=0;
 static unsigned debounceTime[NUM_FILAS_TECLADO]={0,0,0,0};
-
+TipoTecla teclaPulsada = {
+		.col = -1,
+		.row = -1
+};
 char tecladoTL04[4][4] = {
 		{'1', '2', '3', 'A'},
 		{'4', '5', '6', 'B'},
@@ -75,35 +75,30 @@ enum lcd_state {TECLADO_ESPERA_TECLA};
 
 static void teclado_fila_1_isr (void) {
 	if (millis() < debounceTime[0]) return; // si se detecta una repeticion pulsada antes de que pase un tiempo, se la ignora
-	row[0]=1;//teclado.teclaPulsada.row = index!
+	teclaPulsada.row = 0;
 	debounceTime[0] = millis() + DEBOUNCE_TIME;
 }
 
 
 static void teclado_fila_2_isr (void) {
 	if (millis() < debounceTime[1]) return; // si se detecta una repeticion pulsada antes de que pase un tiempo, se la ignora
-	row[1]=1;//teclado.teclaPulsada.row = index! ROW_1
+	teclaPulsada.row = 1;
 	debounceTime[1] = millis() + DEBOUNCE_TIME;
 }
 static void teclado_fila_3_isr (void) {
 	if (millis() < debounceTime[2]) return; // si se detecta una repeticion pulsada antes de que pase un tiempo, se la ignora
-	row[2]=1;//teclado.teclaPulsada.row = index!
+	teclaPulsada.row = 2;
 	debounceTime[2] = millis() + DEBOUNCE_TIME;
 }
 static void teclado_fila_4_isr (void) {
 	if (millis() < debounceTime[3]) return; // si se detecta una repeticion pulsada antes de que pase un tiempo, se la ignora
-	row[3]=1;//teclado.teclaPulsada.row = index!
+	teclaPulsada.row = 3;
 	debounceTime[3] = millis() + DEBOUNCE_TIME;
 }
 
 
-
-static void (* rutinas_ISR[NUM_FILAS_TECLADO]) ()= {teclado_fila_1_isr,teclado_fila_2_isr,teclado_fila_3_isr,teclado_fila_4_isr};
-
-// rutinas que detectan eventos
-
 static int CompruebaTeclaPulsada (fsm_t* this){
-	return (row[0]|row[1]|row[2]|row[3]);
+	return ((teclaPulsada.row == 0) | (teclaPulsada.row == 1) | (teclaPulsada.row == 2) | (teclaPulsada.row == 3));
 }
 static int CompruebaTimeoutColumna (fsm_t* this) {
 	return (millis()-timein >= TIMEOUT_COLUMNA_TECLADO);
@@ -114,17 +109,16 @@ static int CompruebaTimeoutColumna (fsm_t* this) {
 // rutina principal que detecta tecla pulsada y la imprime en pantalla
 //
 static void ProcesaTeclaPulsada(fsm_t* this){
-	int i=0;
-	int k=0;
-	for (i=0; i<4; i++){
-		for (k=0; k<4; k++){
-			if ((row [i] == 1) && (col [k] == 1)){
-				printf ("%c", tecladoTL04[i][k]);
-				fflush (stdout);
-				row[i]=0;
-			}
-		}
-	}
+	TipoTecla *p_teclaPulsada;
+	p_teclaPulsada = (TipoTecla*)(this->user_data);
+
+	printf("La fila pulsada es %d\n", teclaPulsada.row);
+	printf("La columna pulsada es %d\n", teclaPulsada.col);
+
+	printf ("%c\n", tecladoTL04[p_teclaPulsada->row][p_teclaPulsada->col]);
+
+	p_teclaPulsada->col = -1;
+	p_teclaPulsada->row = -1;
 }
 
 
@@ -132,11 +126,17 @@ static void TecladoExcitaColumna(fsm_t* this) {
 	TipoTecla *p_teclaPulsada;
 	p_teclaPulsada = (TipoTecla*)(this->user_data);
 
-	columna++;
-	digitalWrite(columnas[(columna-1)%4], LOW);
-	digitalWrite(columnas[columna%4 ], HIGH);
-	col[(columna-1)%4]=0;
-	col[columna%4]=1;//teclado.teclaPulsada.col = index!
+	if(p_teclaPulsada->col == 3) p_teclaPulsada->col = -1;
+
+	p_teclaPulsada->col++;
+
+	int i;
+	for(i = 0; i < 4; i++){
+		digitalWrite(columnas[i], LOW);
+	}
+	digitalWrite(columnas[p_teclaPulsada->col], HIGH);
+
+
 	timein=millis();
 }
 
@@ -153,14 +153,29 @@ static fsm_trans_t fsm_trans_deteccion_pulsaciones[] = {
 // rutinas que usa main
 void InicializaTeclado() {
 	wiringPiSetupGpio();
-	int i=0;
-	for (i=0; i<4; i++){
-		pinMode(columnas[i], OUTPUT);
-		pinMode(filas[i], INPUT);
-		pullUpDnControl (filas[i], PUD_DOWN );  // todas las filas inicialmente a pull down
-		wiringPiISR(filas[i], INT_EDGE_RISING, rutinas_ISR[i]);  //array de rutinas de interrupción,
-		// detectan flanco de subida
-	}
+
+	pinMode (columnas[0], OUTPUT);
+	pinMode(filas[0], INPUT);
+	pullUpDnControl(filas[0], PUD_UP);
+	wiringPiISR(filas[0], INT_EDGE_RISING, teclado_fila_1_isr);
+
+
+	pinMode (columnas[1], OUTPUT);
+	pinMode(filas[1], INPUT);
+	pullUpDnControl(filas[1], PUD_DOWN);
+	wiringPiISR(filas[1], INT_EDGE_RISING, teclado_fila_2_isr);
+
+
+	pinMode (columnas[2], OUTPUT);
+	pinMode(filas[2], INPUT);
+	pullUpDnControl(filas[2], PUD_DOWN);
+	wiringPiISR(filas[2], INT_EDGE_RISING, teclado_fila_3_isr);
+
+
+	pinMode (columnas[3], OUTPUT);
+	pinMode(filas[3], INPUT);
+	pullUpDnControl(filas[3], PUD_DOWN);
+	wiringPiISR(filas[3], INT_EDGE_RISING, teclado_fila_4_isr);
 }
 
 void delay_hasta (unsigned int next)
@@ -172,8 +187,8 @@ if (next > now) {delay (next - now);}
 int main()
 {
 	TipoTecla teclaPulsada;
-	teclaPulsada.col = 0;
-	teclaPulsada.row = 0;
+	teclaPulsada.col = -1;
+	teclaPulsada.row = -1;
 	unsigned int next;
 	fsm_t* keypad_fsm = fsm_new(TECLADO_ESPERA_COLUMNA, fsm_trans_excitacion_columnas, &teclaPulsada);
 	fsm_t* lcd_fsm = fsm_new(TECLADO_ESPERA_TECLA, fsm_trans_deteccion_pulsaciones , &teclaPulsada);
