@@ -9,7 +9,9 @@ Program to read a matrix keyboard connected to the RaspberryPi.
 
 ## Proposed wiring diagram
 To connect the matrix keyboard to the raspberryPi, 8 connections must be done, 4 for the columns and 4 for the rows.
+
 Following table is a proposal of how to connect the jumper wires from the matrix keyboard to the raspberryPi.
+
 I have used a raspberryPi 4B but you can use execute wiringPi's function `gpio readall` in your raspberryPi terminal to check your GPIO board and its pins to make your own version.
 
 | BCM | Name  | Mode | Connection | Color |
