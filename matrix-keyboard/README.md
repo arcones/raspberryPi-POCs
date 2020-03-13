@@ -31,6 +31,7 @@ You can execute wiringPi's function `gpio readall` in your raspberryPi terminal 
 - Two finite state machines (*fsm*) are concurrently used and managed via interruptions:
 
 ···The first one is switching ON and OFF columns secuentially each 25 ms
+
 ···The second one detects if any key is pressed and if so, prints the key value in screen
 
 - To avoid debounces, the key detection is switched off 325ms just after one key is pressed
