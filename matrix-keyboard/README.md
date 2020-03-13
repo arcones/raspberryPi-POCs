@@ -9,19 +9,26 @@ Program to read a matrix keyboard connected to the RaspberryPi.
 
 ## Proposed wiring diagram
 To connect the matrix keyboard to the raspberryPi, 8 connections must be done, 4 for the columns and 4 for the rows.
-Following table is a proposal of how to connect the jumper wires from the matrix keyboard to the raspberryPi.
-I have used a raspberryPi 4B but you can use execute wiringPi's function `gpio readall` in your raspberryPi terminal to check your GPIO board and its pins to make your own version.
 
-| BCM | Name  | Mode | Connection | Color |
-|:---:|:-----:|:----:|:----------:|:-----:|
-| 0   |SDA.0  |IN    | COL_1      | Yellow|
-| 1   |SCL.0  |IN    | COL_2      | Orange|
-| 2   |SDA.1  |IN    | COL_3      | Red   |
-| 3   |SCL.1  |IN    | COL_4      | Brown |
-| 5   |GPIO.21|IN    | ROW_1      | Grey  |
-| 6   |GPIO.22|IN    | ROW_2      | Purple|
-| 12  |GPIO.26|IN    | ROW_3      | Blue  |
-| 13  |GPIO.23|IN    | ROW_4      | Green |
+Following table is a proposal of how to connect the jumper wires from the matrix keyboard to the raspberryPi.
+
+As in code I have used BCM pin codes, implementation should work in any rasberryPi model.
+
+You can execute wiringPi's function `gpio readall` in your raspberryPi terminal to check where your GPIO board has the BCM pins used.
+
+| BCM | Mode | Connection |
+|:---:|:----:|:----------:|
+| 0   |OUT   | COL_1      |
+| 1   |OUT   | COL_2      |
+| 2   |OUT   | COL_3      |
+| 3   |OUT   | COL_4      |
+| 5   |IN    | ROW_1      |
+| 6   |IN    | ROW_2      |
+| 12  |IN    | ROW_3      |
+| 13  |IN    | ROW_4      |
 
 ## Implementation
-
+- Two finite state machines (*fsm*) are concurrently used and managed via interruptions:
+···The first one is switching ON and OFF columns secuentially each 25 ms
+···The second one detects if any key is pressed and if so, prints the key value in screen
+- To avoid debounces, the key detection is switched off 325ms just after one key is pressed
