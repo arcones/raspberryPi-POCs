@@ -7,7 +7,7 @@
 #define FSM_UPDATE_PERIOD_MS 5
 
 void initPins() {
-	wiringPiSetupGpio();//This kind of setup uses BCM pin numbering so it is portable among raspberryPi different versions
+	wiringPiSetupGpio();//wiringPi setup that uses BCM pin numbering so it is portable among raspberryPi different versions
 
 	int i;
 	for (i=0; i++; i<3){
@@ -27,8 +27,8 @@ void delay_till_next_iteration (unsigned int next) {
 
 int main()
 {
-	fsm_table* cols_fsm = fsm_new(WAIT_COL_STATE, col_transition_table, &key_pressed);
 	fsm_table* keys_fsm = fsm_new(WAIT_KEY_STATE, key_transition_table , &key_pressed);
+	fsm_table* cols_fsm = fsm_new(WAIT_COL_STATE, col_transition_table, &key_pressed);
 
 	initPins();
 

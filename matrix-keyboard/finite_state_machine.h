@@ -13,10 +13,10 @@ typedef struct fsm_transition {
   fsm_output_function out;
 } fsm_transition;
 
-struct fsm_table {
-  int current_state;
-  fsm_transition* tt;
-  void* user_data;
+struct fsm_table  {
+	  int current_state;
+	  fsm_transition* transition;
+	  void* user_data;
 };
 
 fsm_table* fsm_new (int state, fsm_transition* transition, void* user_data);
