@@ -9,5 +9,6 @@ Each project is be stored in a subfolder of this repository and inside it, a REA
 ## List of POCs
 - [**blinky**](blinky/): Light some LEDs connected to the raspberryPi
 - [**matrix-keyboard**](matrix-keyboard/): Read a matrix keyboard connected to the raspberryPi
+- [**remote-led**](remote-led/): Use a matrix keyboard to light some LEDs on demand 
 
 Have fun!

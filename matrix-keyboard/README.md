@@ -2,8 +2,7 @@
 
 Program to read a matrix keyboard connected to the RaspberryPi.
 
-![alt text](img/project.png)
-
+![alt text](img/project.png "Project photo")
 
 ## Requirements 
 - RaspberryPi with [wiringPi](http://wiringpi.com/) lib installed

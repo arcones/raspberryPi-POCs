@@ -2,8 +2,7 @@
 
 Program to blink some LEDs connected to the RaspberryPi.
 
-![alt text](img/project.jpg)
-
+![alt text](img/project.jpg "Project photo")
 
 ## Requirements 
 - RaspberryPi with [wiringPi](http://wiringpi.com/) lib installed
