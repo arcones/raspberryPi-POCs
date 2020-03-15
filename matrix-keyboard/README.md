@@ -2,7 +2,7 @@
 
 Program to read a matrix keyboard connected to the RaspberryPi.
 
-![alt text](img/project.PNG)
+![alt text](img/project.png)
 
 
 ## Requirements 
