@@ -32,4 +32,5 @@ For example, the connection of green LED is the following:
 
 ## Implementation
 The program makes each LED blink sequentially in a loop.
-When the program end all the LEDs are switched OFF.
+
+When the program ends all the LEDs are switched OFF.
