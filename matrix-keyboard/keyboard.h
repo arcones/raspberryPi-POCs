@@ -1,8 +1,6 @@
 #ifndef _TECLADO_TL04_H_
 #define _TECLADO_TL04_H_
 
-#include <wiringPi.h>
-
 #include "mealy_machine.h"
 #include "timer.h"
 

@@ -1,7 +1,7 @@
 #include "keyboard.h"
 
 #include <stdio.h>
-
+#include <wiringPi.h>
 
 Keyboard keyboard = {
 	.cols = { COL_1_BCM_PIN, COL_2_BCM_PIN, COL_3_BCM_PIN, COL_4_BCM_PIN },
@@ -18,7 +18,7 @@ Keyboard keyboard = {
 					 { '7', '8', '9', 'C' },
 					 { '*', '0', '#', 'D' }
 	}
- };
+};
 
 void init_keyboard() {
 	keyboard.col_timeout_timer = timer_new(col_timeout_interruption);
@@ -90,13 +90,6 @@ void on_keystroke() {
 
 	piUnlock(MUTEX_FLAG);
 }
-
-//------------------------------------------------------
-// SUBRUTINAS DE ATENCION A LAS INTERRUPCIONES
-//------------------------------------------------------
-
-//TODO valorar juntar las 4 funciones de filas? o sacar contenido a funciones comunes a todas ellas
-
 
 void row1_interruption(void) {
 	if (millis() < keyboard.row_debounce_delay[ROW_1]) {
