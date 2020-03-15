@@ -28,12 +28,12 @@ You can execute wiringPi's function `gpio readall` in your raspberryPi terminal 
 | 13  |IN    | ROW_4      |
 
 ## Implementation
-Two finite state machines (*fsm*) are concurrently used and managed via interruptions:
+The implementation relies in [Mealy machines](https://en.wikipedia.org/wiki/Mealy_machine) which are finite state machines.
+Two Mealy machines has been implemented and are concurrently working:
 
- - The first one is switching ON and OFF columns secuentially each 25 ms
- - The second one detects if any key is pressed and if so, prints the key value in screen
+![alt text](img/mealy-diagram.png "Mealy Diagram")
 
-To avoid debounces, the key detection is switched off 325ms just after one key is pressed
+ - The first one is switching ON and OFF columns periodically each 25ms, that is, starting with only the first column with high voltage on it, after 25ms it switches OFF the first column and ON the second, and so on; when the 25ms are done on the fourth column which is the last, the process starts again with the first. This short period of change allow to read every column during a normal keystroke.
+ - The second one detects the key pressed and prints the key value in screen.
 
-## Additional resources
-- [Info about finite state machines in wikipedia](https://en.wikipedia.org/wiki/Mealy_machine)
+To avoid debounces, the key detection is switched off 250ms just after every keystroke.

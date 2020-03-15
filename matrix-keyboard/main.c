@@ -1,51 +1,32 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <wiringPi.h>
-#include "finite_state_machine.h"
 #include "keyboard.h"
+#include "mealy_machine.h"
 
-#define FSM_UPDATE_PERIOD_MS 5
+#define MEALY_MACHINE_TRANSITION_PERIOD_MS	10
 
-void initPins() {
-	wiringPiSetupGpio();//wiringPi setup that uses BCM pin numbering so it is portable among raspberryPi different versions
-
-	int i;
-	for (i=0; i++; i<3){
-		pinMode (cols[i], OUTPUT);
-		pinMode(rows[i], INPUT);
-		pullUpDnControl(rows[i], PUD_UP);
-		wiringPiISR(rows[i], INT_EDGE_RISING, interruption_row_functions[i]);
-	}
-}
-
-void delay_till_next_iteration (unsigned int next) {
+void wait_till_mealy_machine_period_is_over(unsigned int next) {
 	unsigned int now = millis();
 	if (next > now) {
-		delay (next - now);
+		delay(next - now);
 	}
 }
 
-int main()
-{
-	fsm_table* keys_fsm = fsm_new(WAIT_KEY_STATE, key_transition_table , &key_pressed);
-	fsm_table* cols_fsm = fsm_new(WAIT_COL_STATE, col_transition_table, &key_pressed);
+int main() {
+	init_keyboard();
 
-	initPins();
+	mealy_machine* cols_machine = mealy_machine_new(WAIT_COL_STATE,col_transitions);
+	mealy_machine* key_pressed_machine = mealy_machine_new(WAIT_KEY_STATE, key_transitions);
 
-	iteration_period = millis();
-	printf ("You can start pressing keys... \n");
 	unsigned int next = millis();
-
 	while (1) {
-		fsm_fire(cols_fsm);
-		fsm_fire(keys_fsm);
-		next += FSM_UPDATE_PERIOD_MS;
-		delay_till_next_iteration (next);
+		mealy_machine_fire(cols_machine);
+		mealy_machine_fire(key_pressed_machine);
+		next += MEALY_MACHINE_TRANSITION_PERIOD_MS;
+		wait_till_mealy_machine_period_is_over(next);
 	}
 
-	fsm_destroy(cols_fsm);
-	fsm_destroy(keys_fsm);
+	timer_destroy(keyboard.col_timeout_timer);
+	mealy_machine_destroy(cols_machine);
+	mealy_machine_destroy(key_pressed_machine);
+
 	return 0;
 }
-
-
