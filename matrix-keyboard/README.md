@@ -2,6 +2,9 @@
 
 Program to read a matrix keyboard connected to the RaspberryPi.
 
+![alt text](img/project.PNG)
+
+
 ## Requirements 
 - RaspberryPi with [wiringPi](http://wiringpi.com/) lib installed
 - [Matrix keyboard](img/matrix-keyboard.jpg)
@@ -12,7 +15,7 @@ To connect the matrix keyboard to the raspberryPi, 8 connections must be done, 4
 
 Following table is a proposal of how to connect the jumper wires from the matrix keyboard to the raspberryPi.
 
-As in code I have used BCM pin codes, implementation should work in any rasberryPi model.
+As in code I have used BCM pin codes, implementation should work in almost any rasberryPi model.
 
 You can execute wiringPi's function `gpio readall` in your raspberryPi terminal to check where your GPIO board has the BCM pins used.
 
