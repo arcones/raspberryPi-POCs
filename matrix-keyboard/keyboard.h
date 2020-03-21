@@ -9,8 +9,8 @@
 #define COL_3_BCM_PIN 	2
 #define COL_4_BCM_PIN 	3
 
-#define ROW_1_BCM_PIN 	5
-#define ROW_2_BCM_PIN 	6
+#define ROW_1_BCM_PIN 	19
+#define ROW_2_BCM_PIN 	26
 #define ROW_3_BCM_PIN 	12
 #define ROW_4_BCM_PIN 	13
 

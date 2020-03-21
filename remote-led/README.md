@@ -25,8 +25,8 @@ You can execute wiringPi's function `gpio readall` in your raspberryPi terminal 
 | 1   |OUT   | COL_2      |
 | 2   |OUT   | COL_3      |
 | 3   |OUT   | COL_4      |
-| 5   |IN    | ROW_1      |
-| 6   |IN    | ROW_2      |
+| 19  |IN    | ROW_1      |
+| 26  |IN    | ROW_2      |
 | 12  |IN    | ROW_3      |
 | 13  |IN    | ROW_4      |
 | 17  |OUT   | GREEN_LED  |
