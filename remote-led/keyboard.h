@@ -23,5 +23,6 @@ typedef struct {
 } keyboard;
 
 void init_keyboard (keyboard* keyboard);
+void waitTillKeyRelease(keyboard* keyboard, int rowNum);
 
 #endif /* KEYBOARD_H_ */

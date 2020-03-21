@@ -41,4 +41,15 @@ For example, the connection of green LED is the following:
 ![alt text](img/wiring-each-LED.PNG)
 
 ## Implementation
-TODO
+It uses a nested loop to read the matrix keyboard and keystrokes are mapped to do some actions with the LEDs as follows:
+
+| Key              | Action                                                    |
+|:----------------:|:---------------------------------------------------------:|
+| A                | Toggle GREEN_LED                                          |
+| B                | Toggle BLUE_LED                                           |
+| C                | Toggle RED_LED                                            |
+| D                | Toggle YELLOW_LED                                         |
+| 0                | Invert the LEDs ON/OFF status                             |
+| Digit above zero | Sequentially blink that number of times LEDs that were on |
+| *                | Switch OFF every LED                                      |
+| #                | Switch ON every LED                                       |

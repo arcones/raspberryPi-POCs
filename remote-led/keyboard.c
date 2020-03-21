@@ -21,8 +21,13 @@ void init_keyboard (keyboard* keyboard)
 		pinMode(keyboard->cols[i],OUTPUT);
 		digitalWrite (keyboard->cols[i],LOW);
 
-		digitalWrite (keyboard->rows[i],LOW);
 		pinMode(keyboard->rows[i],INPUT);
 		digitalWrite (keyboard->rows[i],LOW);
 	}
+}
+
+void waitTillKeyRelease(keyboard* keyboard, int rowNum) {
+	do {
+		delay(25);
+	} while (digitalRead(keyboard->rows[rowNum]) == HIGH);
 }
