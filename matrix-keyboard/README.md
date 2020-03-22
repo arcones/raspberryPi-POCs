@@ -7,7 +7,7 @@ Program to read a matrix keyboard connected to the RaspberryPi.
 ## Requirements 
 - RaspberryPi with [wiringPi](http://wiringpi.com/) lib installed
 - [Matrix keyboard](img/matrix-keyboard.jpg)
-- [Jumper wire (8 female-male)](img/jumper-wire-female-male.jpg)
+- [Jumper wires](img/jumper-wires.jpg)
 
 ## Proposed wiring diagram
 To connect the matrix keyboard to the raspberryPi, 8 connections must be done, 4 for the columns and 4 for the rows.

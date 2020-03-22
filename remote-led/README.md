@@ -6,7 +6,7 @@ Program that uses a matrix keyboard to light some LEDs on demand.
 
 ## Requirements 
 - RaspberryPi with [wiringPi](http://wiringpi.com/) lib installed
-- [Jumper wires (female-male)](img/jumper-wire-female-male.jpg)
+- [Jumper wires](img/jumper-wires.jpg)
 - [Protoboard](img/protoboard.jpg)
 - [270Ohm resistors](img/270OhmResistor.jpg)
 - [LEDs](img/LEDs.jpg)
